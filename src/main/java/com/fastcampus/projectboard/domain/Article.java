@@ -26,11 +26,8 @@ import java.util.Set;
         @Index(columnList = "createdAt"),
         @Index(columnList = "createdBy"),
 } )
-@EntityListeners(AuditingEntityListener.class) // JPA에게 이 엔티티는 Auditing 기능을 사용한다고 알린다.
-// Auditing이란 엔티티의 생성일시, 생성자, 수정일시, 수정자를 자동으로 관리해주는 기능이다.
-// 테스트코드에서 Auditing이 있어야지
 @Entity
-public class Article {
+public class Article extends AuditingFields{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -51,10 +48,12 @@ public class Article {
     // 양방향 바인딩
     private final Set<ArticleComment> articleComments = new LinkedHashSet<>();
 
+/*
     @CreatedDate     @Column(nullable = false) private LocalDateTime createdAt; // 생성일시
     @CreatedBy    @Column(nullable = false, length = 100) private String createdBy; //생성자
     @LastModifiedDate   @Column(nullable = false) private LocalDateTime modifiedAt; // 수정일시
     @LastModifiedBy     @Column(nullable = false, length = 100) private String modifiedBy; // 수정자
+*/
 
 
     // 밖에서 생성하지 못하도록 protected로 막는다.
