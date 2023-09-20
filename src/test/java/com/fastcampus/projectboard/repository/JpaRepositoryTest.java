@@ -86,6 +86,7 @@ class JpaRepositoryTest {
         articleRepository.delete(savedArticle);
         // Then
         assertThat(articleRepository.findById(savedArticle.getId())).isEmpty();
+        assertThat(articleRepository.count()).isEqualTo(previousCount-1);
     }
 
 }
