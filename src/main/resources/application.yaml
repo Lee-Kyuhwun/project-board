@@ -58,7 +58,7 @@ spring:
 #
 #---
 ---
-spring: # ??? ? ??? ???
+spring: # database for test code
   config.activate.on-profile: testdb
   datasource:
     url: jdbc:h2:mem:board;mode=mysql
