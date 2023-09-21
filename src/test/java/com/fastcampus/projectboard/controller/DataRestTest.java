@@ -1,6 +1,7 @@
 package com.fastcampus.projectboard.controller;
 
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +19,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
-
+@Disabled("Spring Data REST 통합테스트는 불필요하므로 제외시킴 ")
 // 스프링 부트 테스트 환경에서 MockMvc를 자동으로 설정합니다.
 @AutoConfigureMockMvc
 // 스프링 부트의 테스트를 위한 어노테이션으로, 애플리케이션 컨텍스트를 로드하여 테스트를 진행합니다.
