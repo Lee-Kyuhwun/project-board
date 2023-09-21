@@ -8,6 +8,8 @@
 ## QueryDSL
 src/main/generated
 
+## application.yaml
+src/main/resources/application.yaml
 
 # User-specific stuff
 .idea/**/workspace.xml
