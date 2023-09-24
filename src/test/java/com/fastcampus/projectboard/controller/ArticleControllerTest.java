@@ -33,7 +33,7 @@ class ArticleControllerTest {
         // then
         mvc.perform(get("/articles"))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.TEXT_HTML))
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML))
                 // 이 뷰는 데이터가 있어야한다.
                 // 테이블에 게시글 목록이 있을텐데 그것은 서버에서 데이터 목록을 보여줬다는 이야기이고
                 // 그 뜻은 modelAttribute로 데이터를 넘겨줬다는 이야기이다.
@@ -71,7 +71,7 @@ class ArticleControllerTest {
         // then
         mvc.perform(get("/articles/1"))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.TEXT_HTML))
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML))
                 .andExpect(model().attributeExists("articles/search"));
                 // 이 뷰는 데이터가 있어야한다.
                 // 테이블에 게시글 목록이 있을텐데 그것은 서버에서 데이터 목록을 보여줬다는 이야기이고
@@ -90,7 +90,7 @@ class ArticleControllerTest {
         // then
         mvc.perform(get("/articles/search-hashtag"))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.TEXT_HTML))
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML))
                 .andExpect(model().attributeExists("articles/search-hashtag"));
         // 이 뷰는 데이터가 있어야한다.
         // 테이블에 게시글 목록이 있을텐데 그것은 서버에서 데이터 목록을 보여줬다는 이야기이고
