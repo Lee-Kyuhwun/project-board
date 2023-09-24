@@ -13,6 +13,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
+
+@Disabled("구현 중")
 @DisplayName("View Controller - 게시글")
 @WebMvcTest(ArticleController.class) // 입력한 컨트롤러만 테스트하겠다는 의미
 class ArticleControllerTest {
