@@ -24,7 +24,7 @@ import java.time.LocalDateTime;
 @MappedSuperclass
 @ToString
 @Getter
-public class AuditingFields {
+public abstract class AuditingFields {
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     @CreatedDate
@@ -34,7 +34,7 @@ public class AuditingFields {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     @CreatedBy
     @Column(nullable = false, updatable = false,length = 100)
-    private String createdBy; //생성자
+    public String createdBy; //생성자
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     @LastModifiedDate
@@ -44,5 +44,5 @@ public class AuditingFields {
 
     @LastModifiedBy
     @Column(nullable = false, length = 100)
-    private String modifiedBy; // 수정자
+    public String modifiedBy; // 수정자
 }
