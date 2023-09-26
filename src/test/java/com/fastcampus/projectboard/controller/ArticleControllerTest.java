@@ -1,10 +1,13 @@
 package com.fastcampus.projectboard.controller;
 
+import com.fastcampus.projectboard.config.JpaConfig;
+import com.fastcampus.projectboard.config.SecurityConfig;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -15,6 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 
 @Disabled("구현 중")
+@Import({SecurityConfig.class})
 @DisplayName("View Controller - 게시글")
 @WebMvcTest(ArticleController.class) // 입력한 컨트롤러만 테스트하겠다는 의미
 class ArticleControllerTest {
