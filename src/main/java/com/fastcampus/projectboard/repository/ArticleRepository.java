@@ -31,4 +31,6 @@ public interface ArticleRepository extends
 
 
     }
+
+
 }

@@ -103,4 +103,8 @@ class ArticleControllerTest {
         // 그 뜻은 modelAttribute로 데이터를 넘겨줬다는 이야기이다.
         // 그러므로 modelAttribute로 넘겨준 데이터가 있는지 확인해야한다.
     }
+
+
+
+
 }

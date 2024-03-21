@@ -12,7 +12,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -23,7 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 //@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DisplayName("JPA 연결 테스트")
 @Import(JpaConfig.class) // 이거 없으면 Auditing적용이 안된다. 
-@DataJpaTest // 슬라이스 테스트
+@DataJpaTest // 슬라이스 테스트란 테스트할 때, 필요한 것만 잘라서 테스트하는 것을 말한다. 즉, JPA 관련된 Bean들만 등록해서 테스트하겠다는 의미이다.
 // @DataJpaTest 애노테이션을 사용하면, 테스트가 실행된 후에 자동으로 롤백을 수행합니다. 따라서 데이터베이스에 영구적인 변경이 발생하지 않게 됩니다.
 class JpaRepositoryTest {
     private final ArticleRepository articleRepository;

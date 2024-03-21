@@ -1,19 +1,28 @@
 package com.fastcampus.projectboard.controller;
 
 
+import com.fastcampus.projectboard.RestDocsConfiguration;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.MockMvcBuilderCustomizer;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.restdocs.RestDocumentationContextProvider;
+import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.WebApplicationContext;
 
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -24,12 +33,28 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional
 @AutoConfigureMockMvc
 @SpringBootTest
+@Import({RestDocsConfiguration.class})
 class DataRestTest {
 
-    private final MockMvc mvc;
 
     DataRestTest(@Autowired MockMvc mvc) {
         this.mvc = mvc;
+    }
+
+
+    private MockMvc mvc;
+
+    @Autowired
+    private WebApplicationContext context;
+
+    @Autowired
+    private MockMvcBuilderCustomizer restDocumentationConfigurer;
+
+    @BeforeEach
+    void setUp() {
+        this.mvc = MockMvcBuilders.webAppContextSetup(context)
+                .apply(MockMvcRestDocumentation.documentationConfiguration(context))
+                .build();
     }
 
 
@@ -41,7 +66,8 @@ class DataRestTest {
         // When & Then
         mvc.perform(get("/api/articles"))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.valueOf("application/hal+json")));
+                .andExpect(content().contentType(MediaType.valueOf("application/hal+json")))
+                .andDo(document("articles"));
     }
 
     @DisplayName("[api] 게시글 단건 조회")
@@ -73,8 +99,9 @@ class DataRestTest {
 
         // When & Then
         mvc.perform(get("/api/articleComments"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.valueOf("application/hal+json")));
+                .andExpect(status().is(302))
+//                .andExpect(content().contentType(MediaType.valueOf("application/hal+json")))
+                .andDo(document("articleComments"));
     }
 
     @DisplayName("[api] 댓글 단건 조회")

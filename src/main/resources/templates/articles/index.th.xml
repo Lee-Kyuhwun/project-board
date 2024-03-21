@@ -79,5 +79,5 @@
                   th:class="'page-link' + (${articles.number} >= ${articles.totalPages - 1} ? ' disabled' : '')"
             />
         </attr>
-    </attr>-->
-</thlogic>
+    </attr>
+</thlogic>-->

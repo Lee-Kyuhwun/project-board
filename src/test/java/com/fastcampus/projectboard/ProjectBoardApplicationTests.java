@@ -8,6 +8,7 @@ class ProjectBoardApplicationTests {
 
 	@Test
 	void contextLoads() {
+
 	}
 
 }

@@ -1,18 +1,11 @@
 package com.fastcampus.projectboard.domain;
 
 
+import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.springframework.data.annotation.CreatedBy;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedBy;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import javax.persistence.*;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -27,6 +20,7 @@ import java.util.Set;
         @Index(columnList = "createdBy"),
 } )
 @Entity
+@Builder
 public class Article extends AuditingFields{
 
     @Id
@@ -44,7 +38,10 @@ public class Article extends AuditingFields{
 
     @OrderBy("id")
     @OneToMany(mappedBy = "article", cascade = CascadeType.ALL)
-    @ToString.Exclude
+    @ToString.Exclude // ArticleComment의 toString()에서 Article을 출력하지 않도록 한다.
+    // ArticleComment의 toString()을 호출하면 ArticleComment의 Article 필드를 출력하게 되는데,
+    // 이 때 Article의 toString()이 호출되면 ArticleComment의 toString()이 호출되고 무한루프에 빠지게 된다.
+    // 따라서 ArticleComment의 toString()에서 Article을 출력하지 않도록 한다.
     // 양방향 바인딩
     private final Set<ArticleComment> articleComments = new LinkedHashSet<>();
 
