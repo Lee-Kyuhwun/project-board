@@ -3,6 +3,7 @@ package com.fastcampus.projectboard.service;
 import com.fastcampus.projectboard.domain.Article;
 import com.fastcampus.projectboard.domain.type.SearchType;
 import com.fastcampus.projectboard.dto.ArticleDto;
+import com.fastcampus.projectboard.dto.ArticleUpdateDto;
 import com.fastcampus.projectboard.repository.ArticleRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,10 +18,8 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.*;
-import static org.mockito.Mockito.doNothing;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -69,13 +68,51 @@ class ArticleServiceTest {
     @Test
     void givenArticleInfo_whenCreatingArticle_thenCreatesArticle(){
         // given
-        ArticleDto dto = ArticleDto.of(LocalDateTime.now(), "Uno", "작성자", "제목", "now");
-        willDoNothing().given(articleRepository).save(any(Article.class)); // willDoNothing() 메서드는 아무것도 하지 않는다는 의미이다.
+        given(articleRepository.save(any(Article.class))).willReturn(null); // willDoNothing() 메서드는 아무것도 하지 않는다는 의미이다.
 
         // when
-        sut.saveArticle(dto);
+        sut.saveArticle(ArticleDto.of(LocalDateTime.now(), "Uno", "작성자", "제목", "now"));
         // then
-        then(articleRepository).should().save(any(Article.class));
+        then(articleRepository).should().save(any(Article.class)); // Article이라면 무엇이든 상관없다.
+
     }
+
+
+    @DisplayName("게시글 id와 수정 정보를 입력하면, 게시글을 수정한다.")
+    @Test
+    void givenArticleModifiedInfo_whenUpdatingArticle_thenUpdatingArticle(){
+        // given
+        given(articleRepository.save(any(Article.class))).willReturn(null); // willDoNothing() 메서드는 아무것도 하지 않는다는 의미이다.
+
+        // when
+        sut.updateAritcle(1L, ArticleUpdateDto.of("Uno", "작성자", "제목"));
+        // then
+        then(articleRepository).should().save(any(Article.class)); // Article이라면 무엇이든 상관없다.
+
+    }
+
+
+
+    @DisplayName("게시글 id를 입력하면  게시글을 삭제한다.")
+    @Test
+    void givenArticleID_whenDeletingArticle_thenDeletingArticle(){
+        // given
+        willDoNothing().given(articleRepository).delete(any(Article.class));
+
+        // when
+        sut.deleteArticle(1L);
+        // then
+        then(articleRepository).should().delete(any(Article.class)); // Article이라면 무엇이든 상관없다.
+
+    }
+
+
+
+
+
+
+
+
+
 
 }
