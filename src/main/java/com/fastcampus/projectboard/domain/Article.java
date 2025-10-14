@@ -19,7 +19,6 @@ import java.util.Set;
 
 
 @Getter
-@ToString
 @Table(indexes ={
         @Index(columnList = "title"),
         @Index(columnList = "hashtag"),
@@ -27,6 +26,7 @@ import java.util.Set;
         @Index(columnList = "createdBy"),
 } )
 @Entity
+@ToString(callSuper = true) // 부모 클래스의 toString도 호출
 public class Article extends AuditingFields{
 
     @Id
@@ -42,11 +42,14 @@ public class Article extends AuditingFields{
 
     @Setter private String hashtag; // 해시태그
 
-    @OrderBy("id")
+    @OrderBy("createdAt DESC")
     @OneToMany(mappedBy = "article", cascade = CascadeType.ALL)
-    @ToString.Exclude
+    @ToString.Exclude // 순환참조 방지
     // 양방향 바인딩
     private final Set<ArticleComment> articleComments = new LinkedHashSet<>();
+
+    @Setter
+    @ManyToOne(optional = false) private UserAccount userAccount;
 
 /*
     @CreatedDate     @Column(nullable = false) private LocalDateTime createdAt; // 생성일시
@@ -61,8 +64,8 @@ public class Article extends AuditingFields{
     }
 
     //
-    private Article(String title, String content, String hashtag) {
-        this.title = title;
+    private Article(UserAccount userAccount, String title, String content, String hashtag) {
+        this.userAccount = userAccount;
         this.content = content;
         this.hashtag = hashtag;
     }
@@ -74,8 +77,8 @@ public class Article extends AuditingFields{
     // 팩토리 메서드는 static으로 선언된다.
     // static이므로 클래스의 인스턴스를 생성하지 않고도 이 메서드를 호출할 수 있다.]
     // 이 메서드를 통해 Article 객체를 생성하게 되면, 내부에서 private
-    public static Article of(String title, String content ,String hashtag){
-        return new Article(title, content,hashtag);
+    public static Article of(UserAccount userAccount, String title, String content, String hashtag) {
+        return new Article(userAccount, title, content, hashtag);
     }
 
     // 동등성을 검사할 수 있는

@@ -2,6 +2,7 @@ package com.fastcampus.projectboard.repository;
 
 import com.fastcampus.projectboard.config.JpaConfig;
 import com.fastcampus.projectboard.domain.Article;
+import com.fastcampus.projectboard.domain.UserAccount;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
@@ -28,10 +29,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 class JpaRepositoryTest {
     private final ArticleRepository articleRepository;
     private final ArticleCommentRepository articleCommentRepository;
+    private final UserAccountRepository userAccountRepository;
 
-    public JpaRepositoryTest(@Autowired  ArticleRepository articleRepository,@Autowired ArticleCommentRepository articleCommentRepository) {
+
+    public JpaRepositoryTest(@Autowired  ArticleRepository articleRepository
+                ,@Autowired ArticleCommentRepository articleCommentRepository
+            , @Autowired UserAccountRepository userAccountRepository) {
         this.articleRepository = articleRepository;
         this.articleCommentRepository = articleCommentRepository;
+        this.userAccountRepository = userAccountRepository;
     }
 
 
@@ -40,56 +46,63 @@ class JpaRepositoryTest {
     @Test
     void givenTestData_whenSelecting_thenWorksFine(){
         //given
-        Article savedArticle = articleRepository.save(Article.of("new article","content","uno"));
+        long previousCount = articleRepository.count();
+        UserAccount userAccount = userAccountRepository.save(UserAccount.of("uno", "pw", null, null, null));
+        Article article = Article.of(userAccount, "new article", "new content", "#spring");
+
         //when
-        List<Article> articles = articleRepository.findAll();
+        articleRepository.save(article);
         //then
-        assertThat(articles).isNotEmpty();
-        assertThat(articles).hasSize(1);
+        assertThat(articleRepository.count()).isEqualTo(previousCount + 1);
     }
 
 
     @DisplayName("insert 테스트")
     @Test
-    void givenTestData_whenInserting_thenWorksFine(){
+    void givenTestData_whenInserting_thenWorksFine() {
         // Given
-        long previousCount = articleRepository.count() ;
+        long previousCount = articleRepository.count();
+        UserAccount userAccount = userAccountRepository.save(UserAccount.of("uno", "pw", null, null, null));
+        Article article = Article.of(userAccount, "new article", "new content", "#spring");
 
         // When
-        Article savedArticle = articleRepository.save(Article.of("new article","content","uno"));
-        // Then
-        assertThat(articleRepository.count()).isEqualTo(previousCount+1);
+        articleRepository.save(article);
 
+        // Then
+        assertThat(articleRepository.count()).isEqualTo(previousCount + 1);
     }
 
     @DisplayName("update 테스트")
     @Test
-    void givenTestData_whenUpdating_thenWorksFine(){
+    void givenTestData_whenUpdating_thenWorksFine() {
         // Given
-        Article savedArticle = articleRepository.save(Article.of("new article","content","uno"));
-        String updatedHashTag = "#springboot";
+        Article article = articleRepository.findById(1L).orElseThrow();
+        String updatedHashtag = "#springboot";
+        article.setHashtag(updatedHashtag);
+
         // When
-        savedArticle.setHashtag(updatedHashTag);
-        savedArticle.setTitle("updated title");
-        Article updatedArticle = articleRepository.saveAndFlush(savedArticle);
+        Article savedArticle = articleRepository.saveAndFlush(article);
+
         // Then
-        assertThat(updatedArticle.getHashtag()).isEqualTo(updatedHashTag);
-        assertThat(updatedArticle.getTitle()).isEqualTo("updated title");
-        // 어차피 롤백할것이라 어차피 바뀌는 것이 없으므로 생략될 수 있는데 그래서 Flush를 해야지 적용된다.
+        assertThat(savedArticle).hasFieldOrPropertyWithValue("hashtag", updatedHashtag);
     }
 
     @DisplayName("delete 테스트")
     @Test
-    void givenTestData_whenDeleting_thenWorksFine(){
+    void givenTestData_whenDeleting_thenWorksFine() {
         // Given
-        Article savedArticle = articleRepository.save(Article.of("new article","content","uno"));
-        long previousCount = articleRepository.count();
+        Article article = articleRepository.findById(1L).orElseThrow();
+        long previousArticleCount = articleRepository.count();
         long previousArticleCommentCount = articleCommentRepository.count();
+        int deletedCommentsSize = article.getArticleComments().size();
+
         // When
-        articleRepository.delete(savedArticle);
+        articleRepository.delete(article);
+
         // Then
-        assertThat(articleRepository.findById(savedArticle.getId())).isEmpty();
-        assertThat(articleRepository.count()).isEqualTo(previousCount-1);
+        assertThat(articleRepository.count()).isEqualTo(previousArticleCount - 1);
+        assertThat(articleCommentRepository.count()).isEqualTo(previousArticleCommentCount - deletedCommentsSize);
     }
+
 
 }
