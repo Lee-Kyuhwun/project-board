@@ -1,50 +1,66 @@
 package com.fastcampus.projectboard.service;
 
-
+import com.fastcampus.projectboard.domain.Article;
 import com.fastcampus.projectboard.domain.type.SearchType;
 import com.fastcampus.projectboard.dto.ArticleDto;
-import com.fastcampus.projectboard.dto.ArticleUpdateDto;
+import com.fastcampus.projectboard.dto.ArticleWithCommentsDto;
 import com.fastcampus.projectboard.repository.ArticleRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import javax.persistence.EntityNotFoundException;
 
-
+@Slf4j
 @RequiredArgsConstructor
+@Transactional
 @Service
-@Transactional // 메소드가 실행되는 도중에 예외가 발생하면 이 메소드에서 이루어진 모든 DB작업을 rollback한다.
-public class ArticleService   {
+public class ArticleService {
 
     private final ArticleRepository articleRepository;
 
+    @Transactional(readOnly = true)
+    public Page<ArticleDto> searchArticles(SearchType searchType, String searchKeyword, Pageable pageable) {
+        if (searchKeyword == null || searchKeyword.isBlank()) {
+            return articleRepository.findAll(pageable).map(ArticleDto::from);
+        }
 
-    @Transactional(readOnly = true) // transactional을 붙이면, 이 메소드가 실행되는 도중에 예외가 발생하면 이 메소드에서 이루어진 모든 DB작업을 rollback한다.
-    //readonly란 읽기전용이라는 뜻이다. 이 메소드가 실행되는 도중에 예외가 발생하면 이 메소드에서 이루어진 모든 DB작업을 rollback한다.
-    public List<ArticleDto> searchArticles(SearchType title, String search_keyword) {
-        return List.of(); // of()메서드란 불변의 리스트를 생성하는 메서드이다. of()메서드는 인자로 전달된 요소들을 포함하는 리스트를 생성한다.
-
+        return switch (searchType) {
+            case TITLE -> articleRepository.findByTitleContaining(searchKeyword, pageable).map(ArticleDto::from);
+            case CONTENT -> articleRepository.findByContentContaining(searchKeyword, pageable).map(ArticleDto::from);
+            case ID -> articleRepository.findByUserAccount_UserIdContaining(searchKeyword, pageable).map(ArticleDto::from);
+            case NICKNAME -> articleRepository.findByUserAccount_NicknameContaining(searchKeyword, pageable).map(ArticleDto::from);
+            case HASHTAG -> articleRepository.findByHashtag("#" + searchKeyword, pageable).map(ArticleDto::from);
+        };
     }
-    @Transactional(readOnly = true) // transactional을 붙이면, 이 메소드가 실행되는 도중에 예외가 발생하면 이 메소드에서 이루어진 모든 DB작업을 rollback한다.
-    //readonly란 읽기전용이라는 뜻이다. 이 메소드가 실행되는 도중에 예외가 발생하면 이 메소드에서 이루어진 모든 DB작업을 rollback한다.
-    public Page<ArticleDto> searchArticles(long l) {
-        return null;
+
+    @Transactional(readOnly = true)
+    public ArticleWithCommentsDto getArticle(Long articleId) {
+        return articleRepository.findById(articleId)
+                .map(ArticleWithCommentsDto::from)
+                .orElseThrow(() -> new EntityNotFoundException("게시글이 없습니다 - articleId: " + articleId));
     }
 
     public void saveArticle(ArticleDto dto) {
-        // TODO document why this method is empty
-
-
+        articleRepository.save(dto.toEntity());
     }
 
-    public void updateAritcle(long articleId, ArticleUpdateDto dto) {
-
-
+    public void updateArticle(ArticleDto dto) {
+        try {
+            Article article = articleRepository.getReferenceById(dto.id());
+            if (dto.title() != null) { article.setTitle(dto.title()); }
+            if (dto.content() != null) { article.setContent(dto.content()); }
+            article.setHashtag(dto.hashtag());
+        } catch (EntityNotFoundException e) {
+            log.warn("게시글 업데이트 실패. 게시글을 찾을 수 없습니다 - dto: {}", dto);
+        }
     }
 
-    public void deleteArticle(long l) {
-
+    public void deleteArticle(long articleId) {
+        articleRepository.deleteById(articleId);
     }
+
 }
