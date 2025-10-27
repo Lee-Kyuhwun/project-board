@@ -49,8 +49,8 @@ class ArticleCommentServiceTest {
 
         // given
         // articleRepository에서 articleId로 게시글을 조회하는 mock 설정
-        given(articleRepository.findById(articleId))
-                .willReturn(Optional.of(Article.of("title", "content", "#java")));
+//        given(articleRepository.findById(articleId))
+//                .willReturn(Optional.of(Article.of("title", "content", "#java")));
         // when
         List<ArticleCommentDto> articleComments = sut.searchArticlesComment(articleId);
 
