@@ -1,9 +1,6 @@
 package com.fastcampus.projectboard.service;
 
-<<<<<<< HEAD
-=======
 import com.fastcampus.projectboard.domain.Article;
->>>>>>> feature/#21-service
 import com.fastcampus.projectboard.domain.type.SearchType;
 import com.fastcampus.projectboard.dto.ArticleDto;
 import com.fastcampus.projectboard.dto.ArticleWithCommentsDto;
@@ -15,12 +12,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-<<<<<<< HEAD
-=======
 import javax.persistence.EntityNotFoundException;
 
 @Slf4j
->>>>>>> feature/#21-service
 @RequiredArgsConstructor
 @Transactional
 @Service
@@ -30,9 +24,6 @@ public class ArticleService {
 
     @Transactional(readOnly = true)
     public Page<ArticleDto> searchArticles(SearchType searchType, String searchKeyword, Pageable pageable) {
-<<<<<<< HEAD
-        return Page.empty();
-=======
         if (searchKeyword == null || searchKeyword.isBlank()) {
             return articleRepository.findAll(pageable).map(ArticleDto::from);
         }
@@ -43,23 +34,10 @@ public class ArticleService {
             case NICKNAME -> articleRepository.findByUserAccount_NicknameContaining(searchKeyword, pageable).map(ArticleDto::from);
             case HASHTAG -> articleRepository.findByHashtag("#" + searchKeyword, pageable).map(ArticleDto::from);
         };
->>>>>>> feature/#21-service
     }
 
     @Transactional(readOnly = true)
     public ArticleWithCommentsDto getArticle(Long articleId) {
-<<<<<<< HEAD
-        return null;
-    }
-
-    public void saveArticle(ArticleDto dto) {
-    }
-
-    public void updateArticle(ArticleDto dto) {
-    }
-
-    public void deleteArticle(long articleId) {
-=======
         return articleRepository.findById(articleId)
                 .map(ArticleWithCommentsDto::from)
                 .orElseThrow(() -> new EntityNotFoundException("게시글이 없습니다 - articleId: " + articleId));
@@ -82,7 +60,6 @@ public class ArticleService {
 
     public void deleteArticle(long articleId) {
         articleRepository.deleteById(articleId);
->>>>>>> feature/#21-service
     }
 
 }

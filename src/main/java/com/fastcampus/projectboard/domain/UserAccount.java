@@ -20,12 +20,6 @@ public class UserAccount extends AuditingFields {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-<<<<<<< HEAD
-
-    @Column(length = 50)
-    private String userId;
-=======
->>>>>>> feature/#21-service
 
     @Setter @Column(nullable = false, length = 50) private String userId;
     @Setter @Column(nullable = false) private String userPassword;

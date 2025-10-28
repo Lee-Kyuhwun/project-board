@@ -27,6 +27,7 @@ import java.util.List;
 public class ArticleController {
 
     private final ArticleService articleService;
+
     private final PaginationService paginationService;
 
     @GetMapping
@@ -39,6 +40,7 @@ public class ArticleController {
         List<Integer> barNumbers = paginationService.getPaginationBarNumbers(pageable.getPageNumber(), articles.getTotalPages());
         map.addAttribute("articles",articles);
         map.addAttribute("paginationBarNumbers", barNumbers);
+        map.addAttribute("searchTypes", searchType.values()); // values()는 enum의 모든 값을 배열로 반환
         return "articles/index";
     }
     @GetMapping("/{articleid}")
