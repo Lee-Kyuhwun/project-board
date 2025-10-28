@@ -13,10 +13,7 @@ import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
-<<<<<<< HEAD
-=======
 import java.util.Collection;
->>>>>>> feature/#21-service
 import java.util.List;
 
 
@@ -27,11 +24,6 @@ public interface ArticleCommentRepository extends
         , QuerydslPredicateExecutor<ArticleComment> // Querydsl을 사용하기 위해 QuerydslPredicateExecutor를 상속받는다.
         , QuerydslBinderCustomizer<QArticleComment> // Querydsl을 사용하기 위해 QuerydslBinderCustomizer를 상속받는다.
 {
-<<<<<<< HEAD
-    List<ArticleComment> findByArticle_Id(Long articleId);
-
-=======
->>>>>>> feature/#21-service
     @Override
     default void customize(QuerydslBindings bindings, QArticleComment root) {
         bindings.excludeUnlistedProperties(true);
@@ -39,12 +31,6 @@ public interface ArticleCommentRepository extends
         bindings.bind(root.content).first(StringExpression::containsIgnoreCase);
         bindings.bind(root.createdAt).first(DateTimeExpression::eq);
         bindings.bind(root.createdBy).first(StringExpression::containsIgnoreCase);
-<<<<<<< HEAD
-
-
-    }
-=======
->>>>>>> feature/#21-service
 
 
     }

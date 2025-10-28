@@ -1,9 +1,6 @@
 package com.fastcampus.projectboard.service;
 
-<<<<<<< HEAD
-=======
 import com.fastcampus.projectboard.domain.ArticleComment;
->>>>>>> feature/#21-service
 import com.fastcampus.projectboard.dto.ArticleCommentDto;
 import com.fastcampus.projectboard.repository.ArticleCommentRepository;
 import com.fastcampus.projectboard.repository.ArticleRepository;
@@ -15,10 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityNotFoundException;
 import java.util.List;
 
-<<<<<<< HEAD
-=======
 @Slf4j
->>>>>>> feature/#21-service
 @RequiredArgsConstructor
 @Transactional
 @Service
@@ -29,18 +23,6 @@ public class ArticleCommentService {
 
     @Transactional(readOnly = true)
     public List<ArticleCommentDto> searchArticleComments(Long articleId) {
-<<<<<<< HEAD
-        return List.of();
-    }
-
-    public void saveArticleComment(ArticleCommentDto dto) {
-    }
-
-    public void updateArticleComment(ArticleCommentDto dto) {
-    }
-
-    public void deleteArticleComment(Long articleCommentId) {
-=======
         return articleCommentRepository.findByArticle_Id(articleId)
                 .stream()
                 .map(ArticleCommentDto::from)
@@ -66,7 +48,6 @@ public class ArticleCommentService {
 
     public void deleteArticleComment(Long articleCommentId) {
         articleCommentRepository.deleteById(articleCommentId);
->>>>>>> feature/#21-service
     }
 
 }
