@@ -1,6 +1,5 @@
 package com.fastcampus.projectboard.dto;
 
-
 import com.fastcampus.projectboard.domain.Article;
 import com.fastcampus.projectboard.domain.ArticleComment;
 

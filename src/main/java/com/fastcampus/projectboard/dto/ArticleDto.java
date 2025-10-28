@@ -1,12 +1,5 @@
 package com.fastcampus.projectboard.dto;
 
-import java.io.Serializable;
-import java.time.LocalDateTime;
-
-/**
- * A DTO for the {@link com.fastcampus.projectboard.domain.Article} entity
- */
-
 import com.fastcampus.projectboard.domain.Article;
 
 import java.time.LocalDateTime;
