@@ -1,0 +1,37 @@
+package com.fastcampus.projectboard.repository.querydsl;
+
+import com.fastcampus.projectboard.domain.QArticle;
+import com.querydsl.jpa.JPQLQuery;
+import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
+
+import java.util.List;
+
+
+public class ArticleRepositoryCustomImpl extends QuerydslRepositorySupport implements ArticleRepositoryCustom {
+
+
+    /**
+     * Creates a new {@link QuerydslRepositorySupport} instance for the given domain type.
+     *
+     * @param domainClass must not be {@literal null}.
+     */
+    public ArticleRepositoryCustomImpl(Class<?> domainClass) {
+        super(domainClass);
+    }
+
+    @Override
+    public List<String> findAllDistinctHashtags() {
+        // QArticle을 이용해서 distinct hashtag 목록을 조회하는 코드를 작성해야 합니다.
+        QArticle article = QArticle.article;
+
+
+        JPQLQuery<String> query = from(article)
+                .distinct()
+                .select(article.hashtag)
+                .where(article.hashtag.isNotNull())
+                .distinct();
+
+
+        return query.fetch(); // 쿼리를 실행하여 결과를 반환합니다.
+    }
+}

@@ -184,6 +184,8 @@ class ArticleControllerTest {
     @Test
     public void givenNothing_whenRequestingHashtagSearchView_thenReturnArticleHashTagSearchView() throws Exception {
         // given
+        given(articleService.searchArticlesViaHashtag(eq(null), any(Pageable.class))).willReturn(Page.empty());
+        given(paginationService.getPaginationBarNumbers(anyInt(), anyInt())).willReturn(List.of(0, 1, 2, 3, 4));
 
         // when
 
@@ -191,11 +193,13 @@ class ArticleControllerTest {
         mvc.perform(get("/articles/search-hashtag"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML))
-                .andExpect(model().attributeExists("articles/search-hashtag"));
-        // 이 뷰는 데이터가 있어야한다.
-        // 테이블에 게시글 목록이 있을텐데 그것은 서버에서 데이터 목록을 보여줬다는 이야기이고
-        // 그 뜻은 modelAttribute로 데이터를 넘겨줬다는 이야기이다.
-        // 그러므로 modelAttribute로 넘겨준 데이터가 있는지 확인해야한다.
+                .andExpect(view().name("articles/search-hashtag"))
+                .andExpect(model().attributeExists("articles"))
+                .andExpect(model().attributeExists("paginationBarNumbers"));
+
+
+        then(articleService).should().searchArticlesViaHashtag(eq(null), any(Pageable.class));
+        then(paginationService).should().getPaginationBarNumbers(anyInt(), anyInt());
     }
 
 
