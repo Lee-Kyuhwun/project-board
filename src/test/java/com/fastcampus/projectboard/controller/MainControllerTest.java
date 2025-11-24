@@ -11,8 +11,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@Import(SecurityConfig.class)
-@WebMvcTest(MainController.class)
+@Import(SecurityConfig.class) // 테스트용 시큐리티 설정 주입
+@WebMvcTest(MainController.class) // MVC 슬라이스 테스트: 컨트롤러와 관련 빈만 로드
 class MainControllerTest {
 
     private final MockMvc mvc;

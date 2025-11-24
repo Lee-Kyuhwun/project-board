@@ -40,20 +40,21 @@ public class ArticleController {
         List<Integer> barNumbers = paginationService.getPaginationBarNumbers(pageable.getPageNumber(), articles.getTotalPages());
         map.addAttribute("articles",articles);
         map.addAttribute("paginationBarNumbers", barNumbers);
-        map.addAttribute("searchTypes", searchType.values()); // values()는 enum의 모든 값을 배열로 반환
+        map.addAttribute("searchTypes", SearchType.values()); // values()는 enum의 모든 값을 배열로 반환
         return "articles/index";
     }
-    @GetMapping("/{articleid}")
+    @GetMapping("/{articleid:\\d+}")
     public String detail(@PathVariable Long articleid, ModelMap map) {
         ArticleWithCommentsResponse article = ArticleWithCommentsResponse.from(
                 articleService.getArticle(articleid));
         map.addAttribute("article", article);
         map.addAttribute("articleComments", article.articleCommentsResponse());
+        map.addAttribute("totalCount", articleService.getArticleCount());
         return "articles/detail";
     }
 
 
-    @GetMapping("/search-hashtag")
+    @GetMapping("/search-hashtags")
     public String searchHashtag(
             @RequestParam(required = false) String searchValue,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
@@ -61,10 +62,14 @@ public class ArticleController {
         Page<ArticleResponse> articles = articleService.searchArticlesViaHashtag(searchValue, pageable)
                 .map(ArticleResponse::from);
         List<Integer> barNumbers = paginationService.getPaginationBarNumbers(pageable.getPageNumber(), articles.getTotalPages());
+        List<String> hashtags = articleService.getHashtags();
+
+
         map.addAttribute("articles", articles);
+        map.addAttribute("hashtags", hashtags);
         map.addAttribute("paginationBarNumbers", barNumbers);
-        map.addAttribute("searchValue", searchValue);
-        return "articles/search-hashtag";
+        map.addAttribute("searchType", SearchType.HASHTAG);
+        return "articles/search-hashtags";
     }
 
 

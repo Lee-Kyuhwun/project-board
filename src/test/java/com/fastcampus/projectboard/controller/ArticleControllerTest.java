@@ -1,5 +1,6 @@
 package com.fastcampus.projectboard.controller;
 
+import com.fastcampus.projectboard.config.SecurityConfig;
 import com.fastcampus.projectboard.domain.type.SearchType;
 import com.fastcampus.projectboard.dto.ArticleWithCommentsDto;
 import com.fastcampus.projectboard.dto.UserAccountDto;
@@ -9,16 +10,15 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -30,52 +30,67 @@ import static org.mockito.BDDMockito.then;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-
-
-@Disabled("구현 중")
-@AutoConfigureMockMvc(addFilters = false)
-@DisplayName("View Controller - 게시글")
-@WebMvcTest(ArticleController.class) // 입력한 컨트롤러만 테스트하겠다는 의미
+@DisplayName("View 컨트롤러 - 게시글")
+@Import(SecurityConfig.class) // 시큐리티 필터를 최소 구성으로 주입
+@WebMvcTest(ArticleController.class) // MVC 슬라이스: 컨트롤러 + MVC 컴포넌트만 로드
 class ArticleControllerTest {
+
     private final MockMvc mvc;
-    @MockBean
-    private ArticleService articleService;
 
+    @MockBean private ArticleService articleService; // 컨트롤러 의존성을 목으로 대체
+    @MockBean private PaginationService paginationService; // 페이징 계산도 목으로 대체
 
-    @MockBean private PaginationService paginationService;
-
-    ArticleControllerTest(@Autowired MockMvc mvc) { // 테스트에서는 꼭 @Autowired를 붙여줘야 한다.
+    public ArticleControllerTest(@Autowired MockMvc mvc) {
         this.mvc = mvc;
     }
 
 
     @DisplayName("[view][GET] 게시글 리스트 (게시판) 페이지 - 정상 호출")
     @Test
-    public void givenNothing_whenRequestingArticleView_thenReturnArticlesView() throws Exception {
-        // given
+    public void givenNothing_whenRequestingArticlesView_thenReturnsArticlesView() throws Exception {
+        // Given
         given(articleService.searchArticles(eq(null), eq(null), any(Pageable.class))).willReturn(Page.empty());
-        // any 쓰면 null도 허용되어서 안된다. Primitive라서 anyInt()를 써야한다.
-        given(paginationService.getPaginationBarNumbers(anyInt(), anyInt())).willReturn(List.of(0,1,2,3,4));
-        // when
+        given(paginationService.getPaginationBarNumbers(anyInt(), anyInt())).willReturn(List.of(0, 1, 2, 3, 4)); // 뷰에 뿌릴 페이지 바 번호
 
-        // then
+        // When & Then
         mvc.perform(get("/articles"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML))
-                // 이 뷰는 데이터가 있어야한다.
-                // 테이블에 게시글 목록이 있을텐데 그것은 서버에서 데이터 목록을 보여줬다는 이야기이고
-                // 그 뜻은 modelAttribute로 데이터를 넘겨줬다는 이야기이다.
-                // 그러므로 modelAttribute로 넘겨준 데이터가 있는지 확인해야한다.
-                .andExpect(view().name("articles/index")) // viewName이 index인지 확인해야한다.
-                .andExpect(model().attributeExists("articles")) // modelAttribute로 넘겨준 데이터가 있는지 확인해야한다.
-        .andExpect(model().attributeExists("paginationBarNumbers"));
+                .andExpect(view().name("articles/index"))
+                .andExpect(model().attributeExists("articles"))
+                .andExpect(model().attributeExists("paginationBarNumbers"))
+                .andExpect(model().attributeExists("searchTypes"));
         then(articleService).should().searchArticles(eq(null), eq(null), any(Pageable.class));
-        then(paginationService).should().getPaginationBarNumbers(anyInt(), anyInt());;
+        then(paginationService).should().getPaginationBarNumbers(anyInt(), anyInt());
+    }
+
+    @DisplayName("[view][GET] 게시글 리스트 (게시판) 페이지 - 검색어와 함께 호출")
+    @Test
+    public void givenSearchKeyword_whenSearchingArticlesView_thenReturnsArticlesView() throws Exception {
+        // Given
+        SearchType searchType = SearchType.TITLE;
+        String searchValue = "title";
+        given(articleService.searchArticles(eq(searchType), eq(searchValue), any(Pageable.class))).willReturn(Page.empty());
+        given(paginationService.getPaginationBarNumbers(anyInt(), anyInt())).willReturn(List.of(0, 1, 2, 3, 4)); // 검색 시에도 페이지 바 제공
+
+        // When & Then
+        mvc.perform(
+                        get("/articles")
+                                .queryParam("searchType", searchType.name())
+                                .queryParam("searchValue", searchValue)
+                )
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML))
+                .andExpect(view().name("articles/index"))
+                .andExpect(model().attributeExists("articles"))
+                .andExpect(model().attributeExists("searchTypes"));
+        then(articleService).should().searchArticles(eq(searchType), eq(searchValue), any(Pageable.class));
+        then(paginationService).should().getPaginationBarNumbers(anyInt(), anyInt());
     }
 
     @DisplayName("[view][GET] 게시글 리스트 (게시판) 페이지 - 페이징, 정렬 기능")
     @Test
-    void givenPagingAndSortingParams_whenSearchingArticlesPage_thenReturnsArticlesPage() throws Exception {
+    void givenPagingAndSortingParams_whenSearchingArticlesView_thenReturnsArticlesView() throws Exception {
         // Given
         String sortName = "title";
         String direction = "desc";
@@ -102,111 +117,92 @@ class ArticleControllerTest {
         then(paginationService).should().getPaginationBarNumbers(pageable.getPageNumber(), Page.empty().getTotalPages());
     }
 
-    @DisplayName("[view][GET] 게시글 상세 페이지 - 정상 호출")
+    @DisplayName("[view][GET] 게시글 페이지 - 정상 호출")
     @Test
-    public void givenNothing_whenRequestingArticleView_thenReturnArticleView() throws Exception {
-        // given
+    public void givenNothing_whenRequestingArticleView_thenReturnsArticleView() throws Exception {
+        // Given
         Long articleId = 1L;
+        long totalCount = 1L;
         given(articleService.getArticle(articleId)).willReturn(createArticleWithCommentsDto());
-        // when
+        given(articleService.getArticleCount()).willReturn(totalCount); // 사이드바 등에서 전체 글 수를 표시하기 위함
 
-        // then
-        mvc.perform(get("/articles/1"))
+        // When & Then
+        mvc.perform(get("/articles/" + articleId))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML))
                 .andExpect(view().name("articles/detail"))
-                .andExpect(model().attributeExists("article")) // modelAttribute로 넘겨준 데이터가 있는지 확인해야한다.
-                .andExpect(model().attributeExists("articleComments")); // modelAttribute로 넘겨준 데이터가 있는지 확인해야한다.
-
+                .andExpect(model().attributeExists("article"))
+                .andExpect(model().attributeExists("articleComments"))
+                .andExpect(model().attributeExists("articleComments"))
+                .andExpect(model().attribute("totalCount", totalCount));
         then(articleService).should().getArticle(articleId);
-
+        then(articleService).should().getArticleCount();
     }
 
-
-
+    @Disabled("구현 중")
     @DisplayName("[view][GET] 게시글 검색 전용 페이지 - 정상 호출")
     @Test
-    public void givenNothing_whenRequestingArticleSearchView_thenReturnArticleView() throws Exception {
-        // given
+    public void givenNothing_whenRequestingArticleSearchView_thenReturnsArticleSearchView() throws Exception {
+        // Given
 
-        // when
-
-        // then
-        mvc.perform(get("/articles/1"))
+        // When & Then
+        mvc.perform(get("/articles/search"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML))
-                .andExpect(model().attributeExists("articles/search"));
-                // 이 뷰는 데이터가 있어야한다.
-                // 테이블에 게시글 목록이 있을텐데 그것은 서버에서 데이터 목록을 보여줬다는 이야기이고
-                // 그 뜻은 modelAttribute로 데이터를 넘겨줬다는 이야기이다.
-                // 그러므로 modelAttribute로 넘겨준 데이터가 있는지 확인해야한다.
-
+                .andExpect(view().name("articles/search"));
     }
-
-    @DisplayName("[view][GET] 게시글 검색 전용 페이지 - 정상 호출")
-    @Test
-    public void givenSearchKeyword_whenSearchingArticlesView_thenReturnsArticlesView() throws Exception {
-
-        //Given
-        SearchType searchType = SearchType.TITLE;
-        String searchValue = "title";
-
-        given(articleService.searchArticles(
-                eq(SearchType.TITLE),
-                eq(searchValue),
-                any(Pageable.class)
-        )).willReturn(Page.empty());
-        given(paginationService.getPaginationBarNumbers(anyInt(), anyInt())).willReturn(List.of(0,1,2,3,4));
-
-        mvc.perform(get("/articles")
-                .queryParam("searchType", searchType.name())
-                .queryParam("searchValue", searchValue)
-                )
-                .andExpect(status().isOk())
-                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML))
-                .andExpect(view().name("articles/index")) // viewName이 index인지 확인해야한다.
-                .andExpect(model().attributeExists("articles")) // modelAttribute로 넘겨준 데이터가 있는지 확인해야한다.
-                .andExpect(model().attributeExists("paginationBarNumbers"));
-
-        then(articleService).should().searchArticles(
-                eq(SearchType.TITLE),
-                eq(searchValue),
-                any(Pageable.class)
-        );
-        then(paginationService).should().getPaginationBarNumbers(anyInt(), anyInt());
-
-
-    }
-
-
 
     @DisplayName("[view][GET] 게시글 해시태그 검색 페이지 - 정상 호출")
     @Test
-    public void givenNothing_whenRequestingHashtagSearchView_thenReturnArticleHashTagSearchView() throws Exception {
-        // given
+    public void givenNothing_whenRequestingArticleSearchHashtagView_thenReturnsArticleSearchHashtagView() throws Exception {
+        // Given
+        List<String> hashtags = List.of("#java", "#spring", "#boot");
         given(articleService.searchArticlesViaHashtag(eq(null), any(Pageable.class))).willReturn(Page.empty());
-        given(paginationService.getPaginationBarNumbers(anyInt(), anyInt())).willReturn(List.of(0, 1, 2, 3, 4));
+        given(articleService.getHashtags()).willReturn(hashtags);
+        given(paginationService.getPaginationBarNumbers(anyInt(), anyInt())).willReturn(List.of(1, 2, 3, 4, 5));
 
-        // when
-
-        // then
-        mvc.perform(get("/articles/search-hashtag"))
+        // When & Then
+        mvc.perform(get("/articles/search-hashtags"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML))
-                .andExpect(view().name("articles/search-hashtag"))
-                .andExpect(model().attributeExists("articles"))
-                .andExpect(model().attributeExists("paginationBarNumbers"));
-
-
+                .andExpect(view().name("articles/search-hashtags"))
+                .andExpect(model().attribute("articles", Page.empty()))
+                .andExpect(model().attribute("hashtags", hashtags))
+                .andExpect(model().attributeExists("paginationBarNumbers"))
+                .andExpect(model().attribute("searchType", SearchType.HASHTAG));
         then(articleService).should().searchArticlesViaHashtag(eq(null), any(Pageable.class));
+        then(articleService).should().getHashtags();
         then(paginationService).should().getPaginationBarNumbers(anyInt(), anyInt());
     }
 
+    @DisplayName("[view][GET] 게시글 해시태그 검색 페이지 - 정상 호출, 해시태그 입력")
+    @Test
+    public void givenHashtag_whenRequestingArticleSearchHashtagView_thenReturnsArticleSearchHashtagView() throws Exception {
+        // Given
+        String hashtag = "#java";
+        List<String> hashtags = List.of("#java", "#spring", "#boot");
+        given(articleService.searchArticlesViaHashtag(eq(hashtag), any(Pageable.class))).willReturn(Page.empty());
+        given(articleService.getHashtags()).willReturn(hashtags);
+        given(paginationService.getPaginationBarNumbers(anyInt(), anyInt())).willReturn(List.of(1, 2, 3, 4, 5));
 
+        // When & Then
+        mvc.perform(
+                        get("/articles/search-hashtags")
+                                .queryParam("searchValue", hashtag)
+                )
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML))
+                .andExpect(view().name("articles/search-hashtags"))
+                .andExpect(model().attribute("articles", Page.empty()))
+                .andExpect(model().attribute("hashtags", hashtags))
+                .andExpect(model().attributeExists("paginationBarNumbers"))
+                .andExpect(model().attribute("searchType", SearchType.HASHTAG));
+        then(articleService).should().searchArticlesViaHashtag(eq(hashtag), any(Pageable.class));
+        then(articleService).should().getHashtags();
+        then(paginationService).should().getPaginationBarNumbers(anyInt(), anyInt());
+    }
 
-    // 픽스쳐 코드 : 테스트를 위해 필요한 객체를 만들어 주는 메서드
     private ArticleWithCommentsDto createArticleWithCommentsDto() {
-
         return ArticleWithCommentsDto.of(
                 1L,
                 createUserAccountDto(),
@@ -215,24 +211,24 @@ class ArticleControllerTest {
                 "content",
                 "#java",
                 LocalDateTime.now(),
-                "lkh",
+                "uno",
                 LocalDateTime.now(),
-                "lkh"
+                "uno"
         );
     }
 
     private UserAccountDto createUserAccountDto() {
-        return UserAccountDto.of(
-                1L,
-                "lkh",
-                "password",
-                "test@test.com",
-                "nickname",
+        return UserAccountDto.of(1L,
+                "uno",
+                "pw",
+                "uno@mail.com",
+                "Uno",
                 "memo",
                 LocalDateTime.now(),
-                "lkh",
+                "uno",
                 LocalDateTime.now(),
-                "lkh"
+                "uno"
         );
-        }
+    }
+
 }

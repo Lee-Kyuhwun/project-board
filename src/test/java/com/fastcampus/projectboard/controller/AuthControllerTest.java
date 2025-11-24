@@ -10,7 +10,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest
+@WebMvcTest // MVC 슬라이스 테스트로 로그인 뷰만 검증
 @DisplayName("View Controller - 인증")
 public class AuthControllerTest {
 
