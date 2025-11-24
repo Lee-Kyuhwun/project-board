@@ -14,8 +14,8 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("JPA 연결 테스트")
-@Import(JpaConfig.class)
-@DataJpaTest
+@Import(JpaConfig.class) // Auditing 등 JPA 설정을 테스트 컨텍스트에 포함
+@DataJpaTest // JPA 관련 빈만 로드해 인메모리 DB로 슬라이스 테스트 수행
 class JpaRepositoryTest {
 
     private final ArticleRepository articleRepository;
@@ -41,7 +41,7 @@ class JpaRepositoryTest {
         List<Article> articles = articleRepository.findAll();
 
         // Then
-        assertThat(articles)
+        assertThat(articles) // data.sql 에 넣어둔 초기 데이터 123건 확인
                 .isNotNull()
                 .hasSize(123);
     }
@@ -86,7 +86,7 @@ class JpaRepositoryTest {
         int deletedCommentsSize = article.getArticleComments().size();
 
         // When
-        articleRepository.delete(article);
+        articleRepository.delete(article); // 부모 삭제 시 연관 댓글도 함께 제거
 
         // Then
         assertThat(articleRepository.count()).isEqualTo(previousArticleCount - 1);

@@ -15,7 +15,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
-@Disabled("Spring Data REST 통합테스트는 불필요하므로 제외시킨")
+@Disabled("Spring Data REST 통합테스트는 불필요하므로 제외시킨") // Data REST 엔드포인트는 별도 통합 테스트 범위에서 제외
 @DisplayName("Data REST - API 테스트")
 @Transactional
 @AutoConfigureMockMvc
@@ -35,8 +35,8 @@ class DataRestTest {
 
         // When & Then
         mvc.perform(get("/api/articles"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.valueOf("application/hal+json")));
+                .andExpect(status().isOk()) // 200 OK
+                .andExpect(content().contentType(MediaType.valueOf("application/hal+json"))); // HAL 포맷 JSON
     }
 
     @DisplayName("[api] 게시글 단건 조회")
@@ -89,6 +89,7 @@ class DataRestTest {
         // Given
 
         // When & Then
+        // userAccounts 경로는 Spring Data REST 노출 대상이 아니므로 모두 404 응답을 기대
         mvc.perform(get("/api/userAccounts")).andExpect(status().isNotFound());
         mvc.perform(post("/api/userAccounts")).andExpect(status().isNotFound());
         mvc.perform(put("/api/userAccounts")).andExpect(status().isNotFound());

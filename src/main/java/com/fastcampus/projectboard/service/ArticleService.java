@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityNotFoundException;
+import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -24,9 +25,11 @@ public class ArticleService {
 
     @Transactional(readOnly = true)
     public Page<ArticleDto> searchArticles(SearchType searchType, String searchKeyword, Pageable pageable) {
+        // 검색어가 없으면 단순 페이지 조회만 수행
         if (searchKeyword == null || searchKeyword.isBlank()) {
             return articleRepository.findAll(pageable).map(ArticleDto::from);
         }
+        // 검색 타입별로 Repository 메서드를 선택하여 페이징 검색 실행
         return switch (searchType) {
             case TITLE -> articleRepository.findByTitleContaining(searchKeyword, pageable).map(ArticleDto::from);
             case CONTENT -> articleRepository.findByContentContaining(searchKeyword, pageable).map(ArticleDto::from);
@@ -50,6 +53,7 @@ public class ArticleService {
     public void updateArticle(ArticleDto dto) {
         try {
             Article article = articleRepository.getReferenceById(dto.id());
+            // null 아닌 필드만 선택적으로 업데이트하여 부분 수정 허용
             if (dto.title() != null) { article.setTitle(dto.title()); }
             if (dto.content() != null) { article.setContent(dto.content()); }
             article.setHashtag(dto.hashtag());
@@ -61,5 +65,23 @@ public class ArticleService {
     public void deleteArticle(long articleId) {
         articleRepository.deleteById(articleId);
     }
+    public long getArticleCount() {
+        return articleRepository.count();
+    }
+    @Transactional(readOnly = true)
+    public Page<ArticleDto> searchArticlesViaHashtag(String hashtag, Pageable pageable) {
 
+        // 해시태그가 비어 있으면 빈 페이지 반환
+        if(hashtag == null || hashtag.isBlank()) {
+            return Page.empty(pageable);
+        }
+
+        // 해시태그에 #이 없으면 추가
+        String searchHashtag = hashtag.startsWith("#") ? hashtag : "#" + hashtag;
+        return articleRepository.findByHashtag(searchHashtag, pageable).map(ArticleDto::from);
+    }
+
+    public List<String> getHashtags() {
+        return articleRepository.findAllDistinctHashtags();
+    }
 }

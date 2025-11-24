@@ -23,6 +23,7 @@ public class ArticleCommentService {
 
     @Transactional(readOnly = true)
     public List<ArticleCommentDto> searchArticleComments(Long articleId) {
+        // 특정 게시글에 달린 댓글 목록을 조회하고 DTO로 변환
         return articleCommentRepository.findByArticle_Id(articleId)
                 .stream()
                 .map(ArticleCommentDto::from)
@@ -31,6 +32,7 @@ public class ArticleCommentService {
 
     public void saveArticleComment(ArticleCommentDto dto) {
         try {
+            // 지연 로딩 프록시로 Article 참조를 확보한 뒤 댓글 엔티티를 저장
             articleCommentRepository.save(dto.toEntity(articleRepository.getReferenceById(dto.articleId())));
         } catch (EntityNotFoundException e) {
             log.warn("댓글 저장 실패. 댓글의 게시글을 찾을 수 없습니다 - dto: {}", dto);
@@ -40,6 +42,7 @@ public class ArticleCommentService {
     public void updateArticleComment(ArticleCommentDto dto) {
         try {
             ArticleComment articleComment = articleCommentRepository.getReferenceById(dto.id());
+            // 내용만 부분 업데이트; 다른 필드는 불변
             if (dto.content() != null) { articleComment.setContent(dto.content()); }
         } catch (EntityNotFoundException e) {
             log.warn("댓글 업데이트 실패. 댓글을 찾을 수 없습니다 - dto: {}", dto);

@@ -18,6 +18,8 @@ import org.springframework.data.domain.Pageable;
 
 import javax.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -26,19 +28,19 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.*;
 
 @DisplayName("비즈니스 로직 - 게시글")
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockitoExtension.class) // JUnit 실행 시 Mockito 가 @Mock/@InjectMocks 필드를 초기화
 class ArticleServiceTest {
 
-    @InjectMocks private ArticleService sut;
+    @InjectMocks private ArticleService sut; // 테스트 대상(Service) 안에 @Mock 을 주입해 동작만 검증
 
-    @Mock private ArticleRepository articleRepository;
+    @Mock private ArticleRepository articleRepository; // 실제 DB 대신 스텁/검증 전용 가짜 객체
 
     @DisplayName("검색어 없이 게시글을 검색하면, 게시글 페이지를 반환한다.")
     @Test
     void givenNoSearchParameters_whenSearchingArticles_thenReturnsArticlePage() {
         // Given
-        Pageable pageable = Pageable.ofSize(20);
-        given(articleRepository.findAll(pageable)).willReturn(Page.empty());
+        Pageable pageable = Pageable.ofSize(20); // 페이지 크기만 설정한 Page 요청 정보
+        given(articleRepository.findAll(pageable)).willReturn(Page.empty()); // 저장소 호출 시 빈 페이지 반환 시나리오 세팅
 
         // When
         Page<ArticleDto> articles = sut.searchArticles(null, null, pageable);
@@ -48,6 +50,53 @@ class ArticleServiceTest {
         then(articleRepository).should().findAll(pageable);
     }
 
+    @DisplayName("검색어 없이 게시글을 해시태그 검색하면, 빈 페이지를 반환한다.")
+    @Test
+    void givenNoSearchParameters_whenSearchingArticlesViaHashtag_thenReturnEmptyPage() {
+        // Given
+        Pageable pageable = Pageable.ofSize(20);
+
+        // When
+        Page<ArticleDto> articles = sut.searchArticlesViaHashtag(null, pageable);// 해시태그 검색은 검색어가 없으면 빈 페이지 반환
+
+
+        // Then
+        assertThat(articles).isEqualTo(Page.empty(pageable));
+        then(articleRepository).shouldHaveNoInteractions(); // 아무 상호작용도 없어야 한다.
+    }
+
+    @DisplayName("게시글을 해시태그 검색하면, 게시글을 페이지를 반환한다.")
+    @Test
+    void givenHashtag_whenSearchingArticlesViaHashtag_thenReturnEmptyPage() {
+        // Given
+        String hashtag = "#java";
+        Pageable pageable = Pageable.ofSize(20);
+        given(articleRepository.findByHashtag(hashtag, pageable)).willReturn(Page.empty(pageable));
+
+        // When
+        Page<ArticleDto> articles = sut.searchArticlesViaHashtag("java", pageable);// 해시태그 검색 (서비스에서 #을 붙임)
+
+
+        // Then
+        assertThat(articles).isEqualTo(Page.empty(pageable));
+        then(articleRepository).should().findByHashtag(hashtag,pageable);// findByHashtag가 호출되어야 한다.
+    }
+
+    @DisplayName("해시태그를 조회하면, 유니크 해시태그 리스트를 반환한다.")
+    @Test
+    void givenNothing_whenCalling_thenReturnsHashtagList() {
+        // Given
+        List<String> hashtagList = List.of("#java", "#spring", "#boot"); // 미리 정의된 해시태그 목록
+        given(articleRepository.findAllDistinctHashtags()).willReturn(hashtagList);
+
+        // When
+        List<String> actualHasjtags = sut.getHashtags();
+
+        // Then
+        assertThat(actualHasjtags).isEqualTo(hashtagList);
+        then(articleRepository).should().findAllDistinctHashtags();
+    }
+
     @DisplayName("검색어와 함께 게시글을 검색하면, 게시글 페이지를 반환한다.")
     @Test
     void givenSearchParameters_whenSearchingArticles_thenReturnsArticlePage() {
@@ -55,14 +104,14 @@ class ArticleServiceTest {
         SearchType searchType = SearchType.TITLE;
         String searchKeyword = "title";
         Pageable pageable = Pageable.ofSize(20);
-//        given(articleRepository.findByTitleContaining(searchKeyword, pageable)).willReturn(Page.empty());
+        given(articleRepository.findByTitleContaining(searchKeyword, pageable)).willReturn(Page.empty()); // 저장소를 목킹해도 무방
 
         // When
         Page<ArticleDto> articles = sut.searchArticles(searchType, searchKeyword, pageable);
 
         // Then
         assertThat(articles).isEmpty();
-//        then(articleRepository).should().findByTitleContaining(searchKeyword, pageable);
+        then(articleRepository).should().findByTitleContaining(searchKeyword, pageable); // 호출 검증 예시
     }
 
     @DisplayName("게시글을 조회하면, 게시글을 반환한다.")
@@ -192,10 +241,10 @@ class ArticleServiceTest {
                 title,
                 content,
                 hashtag,
-                LocalDateTime.now(),
-                "Uno",
-                LocalDateTime.now(),
-                "Uno");
+                LocalDateTime.now(), // 생성일
+                "Uno",               // 생성자
+                LocalDateTime.now(), // 수정일
+                "Uno");              // 수정자
     }
 
     private UserAccountDto createUserAccountDto() {

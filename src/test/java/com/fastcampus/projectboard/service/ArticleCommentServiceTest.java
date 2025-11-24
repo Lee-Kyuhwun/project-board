@@ -23,13 +23,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.*;
 
 @DisplayName("비즈니스 로직 - 댓글")
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockitoExtension.class) // Mockito 로 가짜 저장소를 주입해 서비스 동작만 검증
 class ArticleCommentServiceTest {
 
-    @InjectMocks private ArticleCommentService sut;
+    @InjectMocks private ArticleCommentService sut; // 테스트 대상(Service)
 
-    @Mock private ArticleRepository articleRepository;
-    @Mock private ArticleCommentRepository articleCommentRepository;
+    @Mock private ArticleRepository articleRepository; // 게시글 조회/참조용 가짜 저장소
+    @Mock private ArticleCommentRepository articleCommentRepository; // 댓글 CRUD 가짜 저장소
 
     @DisplayName("게시글 ID로 조회하면, 해당하는 댓글 리스트를 반환한다.")
     @Test
@@ -43,7 +43,7 @@ class ArticleCommentServiceTest {
         List<ArticleCommentDto> actual = sut.searchArticleComments(articleId);
 
         // Then
-        assertThat(actual)
+        assertThat(actual) // 조회된 댓글 DTO 리스트를 검증
                 .hasSize(1)
                 .first().hasFieldOrPropertyWithValue("content", expected.getContent());
         then(articleCommentRepository).should().findByArticle_Id(articleId);
@@ -54,8 +54,8 @@ class ArticleCommentServiceTest {
     void givenArticleCommentInfo_whenSavingArticleComment_thenSavesArticleComment() {
         // Given
         ArticleCommentDto dto = createArticleCommentDto("댓글");
-        given(articleRepository.getReferenceById(dto.articleId())).willReturn(createArticle());
-        given(articleCommentRepository.save(any(ArticleComment.class))).willReturn(null);
+        given(articleRepository.getReferenceById(dto.articleId())).willReturn(createArticle()); // 연관 게시글 프록시 반환
+        given(articleCommentRepository.save(any(ArticleComment.class))).willReturn(null); // save 동작만 검증
 
         // When
         sut.saveArticleComment(dto);
@@ -88,7 +88,7 @@ class ArticleCommentServiceTest {
         String updatedContent = "댓글";
         ArticleComment articleComment = createArticleComment(oldContent);
         ArticleCommentDto dto = createArticleCommentDto(updatedContent);
-        given(articleCommentRepository.getReferenceById(dto.id())).willReturn(articleComment);
+        given(articleCommentRepository.getReferenceById(dto.id())).willReturn(articleComment); // 기존 댓글 프록시 반환
 
         // When
         sut.updateArticleComment(dto);

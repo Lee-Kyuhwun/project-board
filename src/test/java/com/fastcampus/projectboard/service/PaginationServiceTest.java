@@ -26,8 +26,8 @@ class PaginationServiceTest {
     }
 
     @DisplayName("현재 페이지 번호와 전체 페이지 수를 주면, 페이징 바 번호 리스트를 반환한다.")
-    @MethodSource // 외부 메서드에서 제공하는 다양한 매개변수 조합으로 테스트를 여러 번 실행할 수 있게 해줌
-    @ParameterizedTest(name = "[{index}] 현재 페이지 {0} , 총 페이지 {1} => {2} ") // 테스트 메서드를 매개변수화하여 여러 입력 값에 대해 반복 실행할 수 있게 해줌
+    @MethodSource // 아래 static 메서드에서 파라미터 묶음을 여러 개 공급
+    @ParameterizedTest(name = "[{index}] 현재 페이지 {0} , 총 페이지 {1} => {2} ") // 전달된 값마다 반복 실행
     void givenCurrentPageNumberAndTotalPages_wheCalculating_thenReturnsPaginationBarNumbers(
             int currentPageNumber,
             int totalPages,
@@ -43,6 +43,7 @@ class PaginationServiceTest {
 
         // Then
         assertThat(actual).isEqualTo(expected);
+        assertThat(actual).hasSize(expectedSize);
     }
 
     // 테스트에 사용할 매개변수 조합을 제공하는 메서드
@@ -54,15 +55,15 @@ class PaginationServiceTest {
     // Stream<Arguments>는 Java의 스트림 API를 사용하여 여러 Arguments 객체를 순차적으로 제공
     static Stream<Arguments> givenCurrentPageNumberAndTotalPages_wheCalculating_thenReturnsPaginationBarNumbers(){
         return Stream.of(
-            arguments(1,13,List.of(0,1,2,3,4)),
-            arguments(2,13,List.of(0,1,2,3,4)),
-            arguments(3,13,List.of(0,1,2,3,4)),
-            arguments(4,13,List.of(1,2,3,4,5)),
-            arguments(5,13,List.of(2,3,4,5,6)),
-            arguments(6,13,List.of(4,5,6,7,8)),
-            arguments(10,13,List.of(8,9,10,11,12)),
-            arguments(11,13,List.of(9,10,11,12)),
-            arguments(12,13,List.of(10,11,12))
+            arguments(1,13,5,List.of(1,2,3,4,5)),
+            arguments(2,13,5,List.of(1,2,3,4,5)),
+            arguments(3,13,5,List.of(1,2,3,4,5)),
+            arguments(4,13,5,List.of(2,3,4,5,6)),
+            arguments(5,13,5,List.of(3,4,5,6,7)),
+            arguments(6,13,5,List.of(4,5,6,7,8)),
+            arguments(10,13,5,List.of(8,9,10,11,12)),
+            arguments(11,13,5,List.of(9,10,11,12,13)),
+            arguments(12,13,4,List.of(10,11,12,13))
         );
     }
 
