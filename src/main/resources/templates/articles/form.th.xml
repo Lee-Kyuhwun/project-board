@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<thlogic>
+    <attr sel="#header" th:replace="header :: header" />
+    <attr sel="#footer" th:replace="footer :: footer" />
+
+    <attr sel="main/header/h1" th:text="${article != null ? '게시글 수정' : '게시글 작성'}" />
+
+    <attr sel="#article-form" th:action="${article != null ? '/articles/' + article.id + '/form' : '/articles/form'}" th:method="post" th:object="${article}">
+        <attr sel="#title" th:field="*{title}" />
+        <attr sel="#content" th:field="*{content}" />
+        <attr sel="#hashtag" th:field="*{hashtag}" />
+    </attr>
+
+    <attr sel="a[href='/articles']" th:href="${article != null ? '/articles/' + article.id : '/articles'}" />
+</thlogic>

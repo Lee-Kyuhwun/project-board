@@ -40,4 +40,18 @@ public record ArticleWithCommentsDto(
         );
     }
 
+    public ArticleDto toDto() {
+        return ArticleDto.of(
+                id,
+                userAccountDto,
+                title,
+                content,
+                hashtag,
+                createdAt,
+                createdBy,
+                modifiedAt,
+                modifiedBy
+        );
+    }
+
 }

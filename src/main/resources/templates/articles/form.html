@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <meta name="author" content="Uno Kim">
+  <title>게시글 작성</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+</head>
+
+<body>
+
+<header id="header">
+  헤더 삽입부
+  <hr>
+</header>
+
+<main class="container">
+  <header class="py-5 text-center">
+    <h1>게시글 작성</h1>
+  </header>
+
+  <form id="article-form">
+    <div class="mb-3">
+      <label for="title" class="form-label">제목</label>
+      <input type="text" class="form-control" id="title" name="title" required>
+    </div>
+    <div class="mb-3">
+      <label for="content" class="form-label">본문</label>
+      <textarea class="form-control" id="content" name="content" rows="10" required></textarea>
+    </div>
+    <div class="mb-3">
+      <label for="hashtag" class="form-label">해시태그</label>
+      <input type="text" class="form-control" id="hashtag" name="hashtag" placeholder="#java">
+    </div>
+
+    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+      <button type="submit" class="btn btn-primary">저장</button>
+      <a href="/articles" class="btn btn-secondary">취소</a>
+    </div>
+  </form>
+</main>
+
+<footer id="footer">
+  <hr>
+  푸터 삽입부
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
+</body>
+</html>

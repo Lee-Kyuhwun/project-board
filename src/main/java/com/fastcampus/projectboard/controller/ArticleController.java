@@ -2,6 +2,9 @@ package com.fastcampus.projectboard.controller;
 
 
 import com.fastcampus.projectboard.domain.type.SearchType;
+import com.fastcampus.projectboard.dto.ArticleDto;
+import com.fastcampus.projectboard.dto.UserAccountDto;
+import com.fastcampus.projectboard.dto.request.ArticleRequest;
 import com.fastcampus.projectboard.dto.response.ArticleResponse;
 import com.fastcampus.projectboard.dto.response.ArticleWithCommentsResponse;
 import com.fastcampus.projectboard.service.ArticleService;
@@ -13,10 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -73,6 +73,41 @@ public class ArticleController {
     }
 
 
+    @GetMapping("/form")
+    public String articleForm(ModelMap map) {
+        map.addAttribute("article", ArticleResponse.of(null, null, null, null, null, null, null));
+        return "articles/form";
+    }
 
+    @PostMapping("/form")
+    public String postNewArticle(ArticleRequest articleRequest) {
+        // TODO: 인증 기능 구현 후 실제 사용자 정보로 대체
+        UserAccountDto userAccountDto = UserAccountDto.of("uno", "pw", "uno@mail.com", "Uno", "memo");
+        articleService.saveArticle(articleRequest.toDto(userAccountDto));
+        return "redirect:/articles";
+    }
+
+    @GetMapping("/{articleId}/form")
+    public String updateArticleForm(@PathVariable Long articleId, ModelMap map) {
+        ArticleDto articleDto = articleService.getArticle(articleId).toDto();
+        ArticleResponse article = ArticleResponse.from(articleDto);
+        map.addAttribute("article", article);
+        return "articles/form";
+    }
+
+    @PostMapping("/{articleId}/form")
+    public String updateArticle(@PathVariable Long articleId, ArticleRequest articleRequest) {
+        // TODO: 인증 기능 구현 후 실제 사용자 정보로 대체
+        UserAccountDto userAccountDto = UserAccountDto.of("uno", "pw", "uno@mail.com", "Uno", "memo");
+        articleService.updateArticle(ArticleDto.of(articleId, userAccountDto, articleRequest.title(), articleRequest.content(), articleRequest.hashtag(), null, null, null, null));
+        return "redirect:/articles/" + articleId;
+    }
+
+    @PostMapping("/{articleId}/delete")
+    public String deleteArticle(@PathVariable Long articleId) {
+        // TODO: 인증 기능 구현 후 사용자 검증 추가
+        articleService.deleteArticle(articleId);
+        return "redirect:/articles";
+    }
 
 }
