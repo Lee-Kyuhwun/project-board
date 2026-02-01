@@ -1,9 +1,12 @@
 package com.fastcampus.projectboard.service;
 
+import com.fastcampus.projectboard.domain.Article;
 import com.fastcampus.projectboard.domain.ArticleComment;
+import com.fastcampus.projectboard.domain.UserAccount;
 import com.fastcampus.projectboard.dto.ArticleCommentDto;
 import com.fastcampus.projectboard.repository.ArticleCommentRepository;
 import com.fastcampus.projectboard.repository.ArticleRepository;
+import com.fastcampus.projectboard.repository.UserAccountRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,6 +23,7 @@ public class ArticleCommentService {
 
     private final ArticleRepository articleRepository;
     private final ArticleCommentRepository articleCommentRepository;
+    private final UserAccountRepository userAccountRepository;
 
     @Transactional(readOnly = true)
     public List<ArticleCommentDto> searchArticleComments(Long articleId) {
@@ -32,10 +36,15 @@ public class ArticleCommentService {
 
     public void saveArticleComment(ArticleCommentDto dto) {
         try {
+            Article article = articleRepository.getReferenceById(dto.articleId()); // 존재하는지 확인
+            UserAccount userAccount = userAccountRepository.getReferenceById(dto.userAccountDto().userId()); // 존재하는지 확인
+
+
+
             // 지연 로딩 프록시로 Article 참조를 확보한 뒤 댓글 엔티티를 저장
-            articleCommentRepository.save(dto.toEntity(articleRepository.getReferenceById(dto.articleId())));
+            articleCommentRepository.save(dto.toEntity(article, userAccount));
         } catch (EntityNotFoundException e) {
-            log.warn("댓글 저장 실패. 댓글의 게시글을 찾을 수 없습니다 - dto: {}", dto);
+            log.warn("댓글 저장 실패. 댓글에 필요한 정보를 찾을 수 없습니다 - dto: {}", e.getMessage(), e);
         }
     }
 
